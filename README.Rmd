@@ -12,7 +12,8 @@ knitr::opts_chunk$set(
   out.width = "100%"
 )
 ```
-# scATACutils
+# scATACutils: an R/Bioconductor package for working with 10x scATACseq data
+
 
 <!-- badges: start -->
 <!-- badges: end -->

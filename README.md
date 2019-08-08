@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# scATACutils
+# scATACutils: an R/Bioconductor package for working with 10x scATACseq data
 
 <!-- badges: start -->
 

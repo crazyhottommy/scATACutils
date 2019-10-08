@@ -17,5 +17,8 @@ Imports:
     readr,
     magrittr,
     GenomicRanges,
-    GenomicFeatures
+    GenomicFeatures,
+    ggpointdensity,
+    ggplot2,
+    viridis
 RoxygenNote: 6.1.1

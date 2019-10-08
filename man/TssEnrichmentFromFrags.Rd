@@ -2,7 +2,7 @@
 % Please edit documentation in R/TssEnrichmentFromFrags.R
 \name{TssEnrichmentFromFrags}
 \alias{TssEnrichmentFromFrags}
-\title{Calculate tss enrichment score from 10xscATAC fragment file}
+\title{Calculate tss enrichment score from 10xscATAC fragments.tsv.gz file}
 \usage{
 TssEnrichmentFromFrags(frag_gz_file, txs, flank = 1000, endFlank = 100,
   highest_tss_flank = 50, smooth = 50, strand.aware = TRUE,
@@ -17,11 +17,14 @@ anyother tool but in the same format.}
 \item{flank}{flanking bp of tss (upstream and downstream)}
 
 \item{endFlank}{bp end flanks of flank for local noise control
-   flank               flank
----------------|-----------------
-              tss
----                           ---
-endFlank                     endFlank}
+
+ -------flank---------flank-------
+
+ ----------------|-----------------
+
+ ---------------tss----------------
+
+ endFlank-----------------endFlank}
 
 \item{highest_tss_flank}{bp flanking tss windown for choosing the highest tss score.
 The highest tss enrichment score is not always exactly at tss.}
@@ -30,14 +33,19 @@ The highest tss enrichment score is not always exactly at tss.}
 
 \item{strand.aware}{consider tss strandness when calculating}
 
-\item{barcodeList}{valid barcode list, a file with one column}
+\item{barcodeList}{A vector of valid barcodes}
+}
+\value{
+A dataframe with two columns: cells and the tss_score.
 }
 \description{
-Calculate tss enrichment score from 10xscATAC fragment file
+The memory usuage is not high (~5G), but takes ~2hours for 5000 cells.
 }
 \examples{
+\dontrun{
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 library(dplyr); library(readr); library(BiocParallel)
-txs <- transcripts(TxDb.Hsapiens.UCSC.hg19.knownGene)
+txs<- TxDb.Hsapiens.UCSC.hg19.knownGene
 scores<- TssEnrichmentFromFrags("fragment.tsv.gz", txs = txs)
+}
 }

@@ -9,7 +9,8 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.path = "man/figures/README-",
-  out.width = "100%"
+  out.width = "60%",
+  out.height = "60%"
 )
 ```
 # scATACutils: an R/Bioconductor package for working with 10x scATACseq data
@@ -30,10 +31,98 @@ devtools::install_github("crazyhottommy/scATACutils")
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+Demonstration of some useful functions
 
 ```{r example}
 library(scATACutils)
-## basic example code
+library(dplyr)
+library(readr)
+library(ggplot2)
+
+
+## this takes 5 mins
+#frip<- CalculateFripScore("~/5k_pbmc_atac/fragments.tsv.gz",
+#                          "~/5k_pbmc_atac/peaks.bed")
+
+frip<- read_tsv("~/5k_pbmc_atac/frip.txt", col_names = T)
+
+# a tibble with 3 columns, cell-barcode, depth and a Frip score
+head(frip)
+
+## read in 5k pbmc atac data valid barcdoe
+barcodes<- read_tsv("~/5k_pbmc_atac/pbmc_5k_atac_barcodes.tsv", col_names = F)
+
+# the insert size distribution from https://github.com/crazyhottommy/scATACtools/blob/master/python/get_insert_size_distribution_per_cell.py
+
+insert<- read_tsv("~/5k_pbmc_atac/pbmc_5k_insert_size.txt", col_names = T)
+
+head(insert)
+
+## this takes ~5mins
+banding<- CalculateBandingScore(insert, barcodeList = NULL)
+
+## distribution of the banding score after log10 transformation
+ggplot(banding, aes(sample = log10(banding_score))) + 
+  stat_qq() + 
+  stat_qq_line(color = "red") +
+  theme_bw(base_size = 14)
+
 ```
 
+#### TSS enrichment score
+
+This can take ~2hours using 10 CPUs for 5000 cells.
+
+```{r eval=FALSE}
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+
+tss_scores<- TssEnrichmentFromFrags("~/5k_pbmc_atac/fragments.tsv.gz",
+                                    txs = TxDb.Hsapiens.UCSC.hg19.knownGene,
+                                    workers = 10,
+                                    barcodeList = barcodes$X1)
+```
+
+### depth vs Frip and TSS score
+
+read in a pre-computed tss score for the 5k pbmc atac dataset.
+
+```{r}
+tss_scores<- readRDS("~/5k_pbmc_atac/5k_pbmc_atac_tss_scores.rds")
+head(tss_scores)
+head(frip)
+
+frip_tss<- inner_join(frip, tss_scores)
+
+head(frip_tss)
+
+PlotScatter(frip, y = "FRIP", barcodes = barcodes$X1, hline = 0.6,
+            vline = 3)
+```
+
+TSS score
+
+```{r}
+PlotScatter(frip_tss, y = "tss_score", vline = 3, hline = 6)
+
+```
+
+### Plot ATACseq tracks for each cluster of cells
+
+```{r}
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+library(org.Hs.eg.db)
+PlotCoverageByGroup(gene_name = "MS4A1", fragment = "~/5k_pbmc_atac/atac_viz/10k_pbmc/atac_v1_pbmc_10k_fragments.tsv.gz",
+                     grouping = "~/5k_pbmc_atac/atac_viz/grouping.txt", tick_label_cex = 1, tick.dist = 5000,
+                     track_col = "red", 
+                     label_cex = 0.5,
+                     minor.tick.dist = 1000)
+```
+
+
+## Acknowlegements
+
+* Thanks [Caleb](https://github.com/caleblareau) for sharing the FRIP score code.
+* Thanks [Ansu Satpathy](https://twitter.com/Satpathology) and [Jeffrey Granja](https://github.com/jeffmgranja) for sharing the TSS enrichment score codes. More details can be found at my blog post https://divingintogeneticsandgenomics.rbind.io/post/calculate-scatacseq-tss-enrichment-score/
+I referenced them in the source code.
+* The plotting track function is inspired by a post by Andrew Hill http://andrewjohnhill.com/blog/2019/04/12/streamlining-scatac-seq-visualization-and-analysis/ and re-implemented using the [karyoploteR](http://bioconductor.org/packages/release/bioc/html/karyoploteR.html).
+Check [Signac](https://satijalab.org/signac/) by Tim Sturt for similar functionalities.

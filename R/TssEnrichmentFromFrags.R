@@ -45,33 +45,41 @@ constrainRanges = function(target, windows){
 
 
 
-#' Calculate tss enrichment score from 10xscATAC fragment file
+#' Calculate tss enrichment score from 10xscATAC fragments.tsv.gz file
 #'
+#' The memory usuage is not high (~5G), but takes ~2hours for 5000 cells.
 #' @param frag_gz_file  fragment.tsv.gz file from 10x cellranger-atac output or
 #' anyother tool but in the same format.
 #' @param txs  a txdb object
 #' @param flank flanking bp of tss (upstream and downstream)
 #' @param endFlank  bp end flanks of flank for local noise control
-#'     flank               flank
-#'  ---------------|-----------------
-#'                tss
-#'  ---                           ---
-#'  endFlank                     endFlank
+#'
+#'  -------flank---------flank-------
+#'
+#'  ----------------|-----------------
+#'
+#'  ---------------tss----------------
+#'
+#'  endFlank-----------------endFlank
+#'
+#'
 #'
 #' @param highest_tss_flank bp flanking tss windown for choosing the highest tss score.
 #' The highest tss enrichment score is not always exactly at tss.
-#' @param barcodeList valid barcode list, a file with one column
+#' @param barcodeList A vector of valid barcodes
 #' @param smooth window size to smooth
 #' @param strand.aware consider tss strandness when calculating
 #'
-#' @return
+#' @return A dataframe with two columns: cells and the tss_score.
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 #' library(dplyr); library(readr); library(BiocParallel)
-#' txs <- transcripts(TxDb.Hsapiens.UCSC.hg19.knownGene)
+#' txs<- TxDb.Hsapiens.UCSC.hg19.knownGene
 #' scores<- TssEnrichmentFromFrags("fragment.tsv.gz", txs = txs)
+#' }
 
 TssEnrichmentFromFrags <- function(frag_gz_file,
                                    txs,
@@ -86,11 +94,10 @@ TssEnrichmentFromFrags <- function(frag_gz_file,
   # Make GRanges of fragments that are solid for the cells that we care about
   frags_valid <- data.table::fread(paste0("zcat < ", frag_gz_file)) %>%
     data.frame() %>%
-    mutate(V2 = V2 + 1) %>% # make it 1 based for R
+    dplyr::mutate(V2 = V2 + 1) %>% # make it 1 based for R
     GenomicRanges::makeGRangesFromDataFrame(seqnames.field = "V1", start.field = "V2", end.field = "V3", keep.extra.columns = TRUE)
   if (!is.null(barcodeList)){
-    validBarcodes<- read_tsv(barcodeList, col_names = F)
-    frags_valid<- frags_valid[frags_valid$V4 %in% validBarcodes$X1]
+    frags_valid<- frags_valid[frags_valid$V4 %in% barcodeList]
   }
 
   # common chromosome names, do it per cell instead, see TssEnrichmentSingleCell
@@ -105,8 +112,8 @@ TssEnrichmentFromFrags <- function(frag_gz_file,
   multicoreParam <- BiocParallel::MulticoreParam(workers = workers)
   # can add the chromosome length as additional argument for `coverage`
   # to get 0 coverages if there are no reads there.
-  cvgs<- bplapply(frags_valid_per_cell, function(x) coverage(x), BPPARAM = multicoreParam)
-
+  cvgs<- BiocParallel::bplapply(frags_valid_per_cell, function(x) coverage(x), BPPARAM = multicoreParam)
+  txs<- transcripts(txs)
   txs <- unique(txs)
 
   txs.flanks<- promoters(txs, upstream = flank,
@@ -116,6 +123,8 @@ TssEnrichmentFromFrags <- function(frag_gz_file,
   TssEnrichmentScores<- BiocParallel::bplapply(cvgs, TssEnrichmentSingleCell, txs.flanks, strand.aware = strand.aware, endFlank = endFlank, flank = flank, highest_tss_flank, smooth = smooth, BPPARAM = multicoreParam)
 
   enrichment<- do.call("rbind", TssEnrichmentScores)
+  enrichment<- data.frame(cells = rownames(enrichment),
+                          tss_score = enrichment[,1])
   return(enrichment)
 }
 
@@ -160,7 +169,6 @@ TssEnrichmentSingleCell<- function(cvg, txs.flanks, strand.aware = TRUE, flank =
 
   #smooth
   profile_norm_smooth <- zoo::rollmean(profile_norm, smooth, fill = 1)
-
 
   #enrichment
   max_finite <- function(x){

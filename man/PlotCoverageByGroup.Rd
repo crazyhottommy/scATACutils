@@ -7,9 +7,9 @@
 PlotCoverageByGroup(chrom = NULL, start = NULL, end = NULL,
   gene_name, upstream = 2000, downstream = 2000, fragment, grouping,
   genome = "hg19", txdb = TxDb.Hsapiens.UCSC.hg19.knownGene,
-  eg.db = org.Hs.eg.db, ymax = NULL, label_cex = 1, yaxis_cex = 1,
-  track_col = "cadetblue2", tick.dist = 10000,
-  minor.tick.dist = 2000, tick_label_cex = 1)
+  eg.db = org.Hs.eg.db, ymax = NULL, label_cex = 1,
+  label_side = "left", yaxis_cex = 1, track_col = "cadetblue2",
+  tick.dist = 10000, minor.tick.dist = 2000, tick_label_cex = 1)
 }
 \arguments{
 \item{chrom}{chromosome}
@@ -41,6 +41,8 @@ track will use the same ymax, so it is comparable across clusters.}
 
 \item{label_cex}{size of the cluster label}
 
+\item{label_side}{side of the cluster label. "left" or "right"}
+
 \item{yaxis_cex}{size of the y-axis}
 
 \item{track_col}{color of the track}
@@ -51,8 +53,11 @@ track will use the same ymax, so it is comparable across clusters.}
 
 \item{tick_label_cex}{size of the tick label}
 }
+\value{
+A karyoploteR object
+}
 \description{
-Plot scATACseq coverage for each cluster from tabix indexed fragment.tsv.gz file
+reads in the fragments.tsv.gz file for only the given region (gene), and plot using \href{http://bioconductor.org/packages/release/bioc/html/karyoploteR.html}{karyoploteR} package
 }
 \examples{
 \dontrun{
@@ -67,5 +72,6 @@ plotCoverageByGroup(chrom = chrom, start = start, end = end, fragment = "data/at
                     grouping = "data/atac_viz/grouping.txt", track_col = "red")
 plotCoverageByGroup(gene_name = "NKG7", fragment = "data/atac_viz/10k_pbmc/atac_v1_pbmc_10k_fragments.tsv.gz",
                     grouping = "data/atac_viz/grouping.txt", tick_label_cex = 1, tick.dist = 5000,
-                    minor.tick.dist = 1000)}
+                    minor.tick.dist = 1000)
+}
 }

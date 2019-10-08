@@ -10,7 +10,7 @@ CalculateBandingScore(df, barcodeList = NULL)
 \item{df}{A dataframe with 3 columns. cell column contains the cell barcode for all cells, insert_size column contains the insert size, read_count
 column contains the number of paired reads for that insert size}
 
-\item{barcodeList}{A path to a single column dataframe with valid barcodes. e.g. barcodes.tsv from 10x}
+\item{barcodeList}{a vector of valid barcodes. e.g. the first column of barcodes.tsv from 10x}
 }
 \value{
 Banding scores for all cells.

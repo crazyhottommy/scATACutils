@@ -2,7 +2,9 @@
 
 export("%>%")
 export(CalculateBandingScore)
+export(CalculateFripScore)
 export(PlotCoverageByGroup)
+export(PlotScatter)
 export(TssEnrichmentFromFrags)
 export(addGeneNameToTxdb)
 export(extend)

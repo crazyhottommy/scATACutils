@@ -42,6 +42,7 @@ addGeneNameToTxdb<- function(txdb = TxDb.Hsapiens.UCSC.hg19.knownGene,
 
 #' Plot scATACseq coverage for each cluster from tabix indexed fragment.tsv.gz file
 #'
+#' reads in the fragments.tsv.gz file for only the given region (gene), and plot using \href{http://bioconductor.org/packages/release/bioc/html/karyoploteR.html}{karyoploteR} package
 #' @param chrom chromosome
 #' @param start chromosome start
 #' @param end chromosome end
@@ -58,13 +59,14 @@ addGeneNameToTxdb<- function(txdb = TxDb.Hsapiens.UCSC.hg19.knownGene,
 #' @param ymax ymax for each track, if not specified, max of all the tracks will be calculated. Every
 #' track will use the same ymax, so it is comparable across clusters.
 #' @param label_cex size of the cluster label
+#' @param label_side side of the cluster label. "left" or "right"
 #' @param yaxis_cex size of the y-axis
 #' @param track_col color of the track
 #' @param tick.dist chromosome tick distance to mark, default 10kb
 #' @param minor.tick.dist minor chromosome tick distance to mark, default 2000 bp
 #' @param tick_label_cex size of the tick label
 #'
-#' @return
+#' @return A karyoploteR object
 #' @export
 #'
 #' @examples
@@ -81,13 +83,14 @@ addGeneNameToTxdb<- function(txdb = TxDb.Hsapiens.UCSC.hg19.knownGene,
 
 #' plotCoverageByGroup(gene_name = "NKG7", fragment = "data/atac_viz/10k_pbmc/atac_v1_pbmc_10k_fragments.tsv.gz",
 #'                     grouping = "data/atac_viz/grouping.txt", tick_label_cex = 1, tick.dist = 5000,
-#'                     minor.tick.dist = 1000)}
+#'                     minor.tick.dist = 1000)
+#'}
 
 PlotCoverageByGroup<- function(chrom = NULL, start = NULL, end =NULL, gene_name, upstream = 2000,
                                downstream = 2000, fragment, grouping,
                                genome ='hg19', txdb = TxDb.Hsapiens.UCSC.hg19.knownGene,
                                eg.db = org.Hs.eg.db,
-                               ymax = NULL, label_cex = 1,
+                               ymax = NULL, label_cex = 1, label_side = "left",
                                yaxis_cex = 1, track_col = "cadetblue2",
                                tick.dist = 10000, minor.tick.dist = 2000,
                                tick_label_cex = 1){
@@ -159,7 +162,7 @@ PlotCoverageByGroup<- function(chrom = NULL, start = NULL, end =NULL, gene_name,
   }
   # GRangesList object by group/cluster
   reads_by_group<- split(reads, reads$cluster)
-  print(reads_by_group)
+  #print(reads_by_group)
   coverage_norm<- normalized_coverage(reads_by_group)
 
   ## calculate the max coverage if not specified
@@ -184,7 +187,7 @@ PlotCoverageByGroup<- function(chrom = NULL, start = NULL, end =NULL, gene_name,
     karyoploteR::kpPlotCoverage(kp, data=read,
                          r0=at$r0, r1=at$r1, col = track_col, ymax = yaxis_common)
     karyoploteR::kpAxis(kp, ymin=0, ymax=yaxis_common, numticks = 2, r0=at$r0, r1=at$r1, cex = yaxis_cex, labels = c("", yaxis_common))
-    karyoploteR::kpAddLabels(kp, labels = names(coverage_norm)[i], r0=at$r0, r1=at$r1,
+    karyoploteR::kpAddLabels(kp, side = label_side, labels = names(coverage_norm)[i], r0=at$r0, r1=at$r1,
                 cex=label_cex, label.margin = 0.035)
   }
 }

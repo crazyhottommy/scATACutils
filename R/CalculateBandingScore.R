@@ -45,15 +45,15 @@ CalculateBandingScore<- function(df, barcodeList = NULL){
     banding_scores<- df %>%
       dplyr::filter(cell %in% barcodeList)
     dplyr::group_by(cell) %>%
-      dplyr::nest() %>%
-      dplyr::mutate(banding_score = map_dbl(data, get_banding_score)) %>%
+      tidyr::nest() %>%
+      dplyr::mutate(banding_score = purrr::map_dbl(data, get_banding_score)) %>%
       dplyr::select(-data)
 
   } else{
-    banding_scores<- frags %>%
+    banding_scores<- df %>%
       dplyr::group_by(cell) %>%
-      dplyr::nest() %>%
-      dplyr::mutate(banding_score = map_dbl(data, get_banding_score)) %>%
+      tidyr::nest() %>%
+      dplyr::mutate(banding_score = purrr::map_dbl(data, get_banding_score)) %>%
       dplyr::select(-data)
   }
 

@@ -33,7 +33,7 @@ devtools::install_github("crazyhottommy/scATACutils")
 
 Demonstration of some useful functions
 
-```{r example}
+```{r warning=FALSE, message=FALSE}
 library(scATACutils)
 library(dplyr)
 library(readr)
@@ -86,7 +86,7 @@ tss_scores<- TssEnrichmentFromFrags("~/5k_pbmc_atac/fragments.tsv.gz",
 
 read in a pre-computed tss score for the 5k pbmc atac dataset.
 
-```{r}
+```{r message=FALSE}
 tss_scores<- readRDS("~/5k_pbmc_atac/5k_pbmc_atac_tss_scores.rds")
 head(tss_scores)
 head(frip)
@@ -108,7 +108,7 @@ PlotScatter(frip_tss, y = "tss_score", vline = 3, hline = 6)
 
 ### Plot ATACseq tracks for each cluster of cells
 
-```{r}
+```{r message=FALSE}
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 library(org.Hs.eg.db)
 PlotCoverageByGroup(gene_name = "MS4A1", fragment = "~/5k_pbmc_atac/atac_viz/10k_pbmc/atac_v1_pbmc_10k_fragments.tsv.gz",

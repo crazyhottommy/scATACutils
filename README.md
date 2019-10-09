@@ -29,15 +29,6 @@ Demonstration of some useful functions
 ``` r
 library(scATACutils)
 library(dplyr)
-#> Warning: package 'dplyr' was built under R version 3.5.2
-#> 
-#> Attaching package: 'dplyr'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     filter, lag
-#> The following objects are masked from 'package:base':
-#> 
-#>     intersect, setdiff, setequal, union
 library(readr)
 library(ggplot2)
 
@@ -47,12 +38,6 @@ library(ggplot2)
 #                          "~/5k_pbmc_atac/peaks.bed")
 
 frip<- read_tsv("~/5k_pbmc_atac/frip.txt", col_names = T)
-#> Parsed with column specification:
-#> cols(
-#>   cells = col_character(),
-#>   depth = col_double(),
-#>   FRIP = col_double()
-#> )
 
 # a tibble with 3 columns, cell-barcode, depth and a Frip score
 head(frip)
@@ -68,20 +53,10 @@ head(frip)
 
 ## read in 5k pbmc atac data valid barcdoe
 barcodes<- read_tsv("~/5k_pbmc_atac/pbmc_5k_atac_barcodes.tsv", col_names = F)
-#> Parsed with column specification:
-#> cols(
-#>   X1 = col_character()
-#> )
 
 # the insert size distribution from https://github.com/crazyhottommy/scATACtools/blob/master/python/get_insert_size_distribution_per_cell.py
 
 insert<- read_tsv("~/5k_pbmc_atac/pbmc_5k_insert_size.txt", col_names = T)
-#> Parsed with column specification:
-#> cols(
-#>   cell = col_character(),
-#>   insert_size = col_double(),
-#>   read_count = col_double()
-#> )
 
 head(insert)
 #> # A tibble: 6 x 3
@@ -104,7 +79,7 @@ ggplot(banding, aes(sample = log10(banding_score))) +
   theme_bw(base_size = 14)
 ```
 
-<img src="man/figures/README-example-1.png" width="60%" height="60%" />
+<img src="man/figures/README-unnamed-chunk-2-1.png" width="60%" height="60%" />
 
 #### TSS enrichment score
 
@@ -145,7 +120,6 @@ head(frip)
 #> 6 AAACGAAAGAACGACC-1     3 0.333
 
 frip_tss<- inner_join(frip, tss_scores)
-#> Joining, by = "cells"
 #> Warning: Column `cells` joining character vector and factor, coercing into
 #> character vector
 
@@ -164,7 +138,7 @@ PlotScatter(frip, y = "FRIP", barcodes = barcodes$X1, hline = 0.6,
             vline = 3)
 ```
 
-<img src="man/figures/README-unnamed-chunk-3-1.png" width="60%" height="60%" />
+<img src="man/figures/README-unnamed-chunk-4-1.png" width="60%" height="60%" />
 
 TSS
 score
@@ -173,86 +147,21 @@ score
 PlotScatter(frip_tss, y = "tss_score", vline = 3, hline = 6)
 ```
 
-<img src="man/figures/README-unnamed-chunk-4-1.png" width="60%" height="60%" />
+<img src="man/figures/README-unnamed-chunk-5-1.png" width="60%" height="60%" />
 
 ### Plot ATACseq tracks for each cluster of cells
 
 ``` r
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
-#> Loading required package: GenomicFeatures
-#> Loading required package: BiocGenerics
-#> Loading required package: parallel
-#> 
-#> Attaching package: 'BiocGenerics'
-#> The following objects are masked from 'package:parallel':
-#> 
-#>     clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
-#>     clusterExport, clusterMap, parApply, parCapply, parLapply,
-#>     parLapplyLB, parRapply, parSapply, parSapplyLB
-#> The following objects are masked from 'package:dplyr':
-#> 
-#>     combine, intersect, setdiff, union
-#> The following objects are masked from 'package:stats':
-#> 
-#>     IQR, mad, sd, var, xtabs
-#> The following objects are masked from 'package:base':
-#> 
-#>     anyDuplicated, append, as.data.frame, basename, cbind,
-#>     colMeans, colnames, colSums, dirname, do.call, duplicated,
-#>     eval, evalq, Filter, Find, get, grep, grepl, intersect,
-#>     is.unsorted, lapply, lengths, Map, mapply, match, mget, order,
-#>     paste, pmax, pmax.int, pmin, pmin.int, Position, rank, rbind,
-#>     Reduce, rowMeans, rownames, rowSums, sapply, setdiff, sort,
-#>     table, tapply, union, unique, unsplit, which, which.max,
-#>     which.min
-#> Loading required package: S4Vectors
-#> Loading required package: stats4
-#> 
-#> Attaching package: 'S4Vectors'
-#> The following objects are masked from 'package:dplyr':
-#> 
-#>     first, rename
-#> The following object is masked from 'package:base':
-#> 
-#>     expand.grid
-#> Loading required package: IRanges
-#> 
-#> Attaching package: 'IRanges'
-#> The following objects are masked from 'package:dplyr':
-#> 
-#>     collapse, desc, slice
-#> Loading required package: GenomeInfoDb
-#> Loading required package: GenomicRanges
-#> Loading required package: AnnotationDbi
-#> Loading required package: Biobase
-#> Welcome to Bioconductor
-#> 
-#>     Vignettes contain introductory material; view with
-#>     'browseVignettes()'. To cite Bioconductor, see
-#>     'citation("Biobase")', and for packages 'citation("pkgname")'.
-#> 
-#> Attaching package: 'AnnotationDbi'
-#> The following object is masked from 'package:dplyr':
-#> 
-#>     select
 library(org.Hs.eg.db)
-#> 
 PlotCoverageByGroup(gene_name = "MS4A1", fragment = "~/5k_pbmc_atac/atac_viz/10k_pbmc/atac_v1_pbmc_10k_fragments.tsv.gz",
                      grouping = "~/5k_pbmc_atac/atac_viz/grouping.txt", tick_label_cex = 1, tick.dist = 5000,
                      track_col = "red", 
                      label_cex = 0.5,
                      minor.tick.dist = 1000)
-#> Parsed with column specification:
-#> cols(
-#>   cell = col_character(),
-#>   cluster = col_character(),
-#>   depth = col_double()
-#> )
-#> 'select()' returned 1:1 mapping between keys and columns
-#> Joining, by = "cell"
 ```
 
-<img src="man/figures/README-unnamed-chunk-5-1.png" width="60%" height="60%" />
+<img src="man/figures/README-unnamed-chunk-6-1.png" width="60%" height="60%" />
 
 ## Acknowlegements
 

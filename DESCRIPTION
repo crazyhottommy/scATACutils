@@ -20,5 +20,6 @@ Imports:
     GenomicFeatures,
     ggpointdensity,
     ggplot2,
-    viridis
+    viridis,
+    SingleCellExperiment
 RoxygenNote: 6.1.1

@@ -14,7 +14,8 @@ column contains the number of paired reads for that insert size.}
 A banding score for that cell
 }
 \description{
-Calculate banding score for a single cell
+A banding score is a measure signals of nucleosomal periodicity in their fragment size distribution.
+see \href{https://www.ncbi.nlm.nih.gov/pubmed/30078704}{Darren et.al.2018}
 }
 \examples{
 

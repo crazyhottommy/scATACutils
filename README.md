@@ -26,6 +26,9 @@ devtools::install_github("crazyhottommy/scATACutils")
 
 Demonstration of some useful functions
 
+Download the public 5k pbmc data at
+<https://support.10xgenomics.com/single-cell-atac/datasets/1.1.0/atac_pbmc_5k_v1>
+
 ``` r
 library(scATACutils)
 library(dplyr)
@@ -149,6 +152,57 @@ PlotScatter(frip_tss, y = "tss_score", vline = 3, hline = 6)
 
 <img src="man/figures/README-unnamed-chunk-5-1.png" width="60%" height="60%" />
 
+### Plot PC correlation with the sequencing depth
+
+It is known that the first PC is correlated with the sequencing depth,
+and it is usually discarded for downstream clustering. Let’s check that.
+
+Also see [Assessment of computational methods for the analysis of
+single-cell ATAC-seq
+data](https://www.biorxiv.org/content/10.1101/739011v1) for discussing
+this as well.
+
+``` r
+library(Seurat)
+#> Warning: package 'Seurat' was built under R version 3.5.2
+
+peaks <- Read10X_h5(filename = "~/5k_pbmc_atac/atac_pbmc_5k_v1_filtered_peak_bc_matrix.h5")
+
+# binarize the matrix
+# peaks@x[peaks@x >0]<- 1 
+
+## create a seurat object
+pbmc_seurat <- CreateSeuratObject(counts = peaks, assay = 'ATAC', project = '5k_pbmc')
+
+pbmc_seurat@meta.data %>% head()
+#>                    orig.ident nCount_ATAC nFeature_ATAC
+#> AAACGAAAGACACTTC-1    5k_pbmc        9104          3845
+#> AAACGAAAGCATACCT-1    5k_pbmc       14701          6127
+#> AAACGAAAGCGCGTTC-1    5k_pbmc        7139          3345
+#> AAACGAAAGGAAGACA-1    5k_pbmc       10148          4295
+#> AAACGAACAGGCATCC-1    5k_pbmc       10704          4754
+#> AAACGAAGTTTGTCTT-1    5k_pbmc        9538          4219
+
+## do TF-IDF transformation and run PCA for dimension reduction/Latent Semantic Index
+pbmc_seurat<- RunLSI(pbmc_seurat, n = 50)
+
+## convert to SingleCellExperiment
+pbmc_se<- as.SingleCellExperiment(pbmc_seurat)
+
+PlotPCcorrelation(pbmc_seurat, reduction = "lsi")
+```
+
+<img src="man/figures/README-unnamed-chunk-6-1.png" width="60%" height="60%" />
+
+Note the name of the reduction is different for SingleCellExperiment
+object.
+
+``` r
+PlotPCcorrelation(pbmc_se, reduction = "LSI")
+```
+
+<img src="man/figures/README-unnamed-chunk-7-1.png" width="60%" height="60%" />
+
 ### Plot ATACseq tracks for each cluster of cells
 
 ``` r
@@ -161,7 +215,7 @@ PlotCoverageByGroup(gene_name = "MS4A1", fragment = "~/5k_pbmc_atac/atac_viz/10k
                      minor.tick.dist = 1000)
 ```
 
-<img src="man/figures/README-unnamed-chunk-6-1.png" width="60%" height="60%" />
+<img src="man/figures/README-unnamed-chunk-8-1.png" width="60%" height="60%" />
 
 ## Acknowlegements
 

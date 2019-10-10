@@ -33,6 +33,8 @@ devtools::install_github("crazyhottommy/scATACutils")
 
 Demonstration of some useful functions
 
+Download the public 5k pbmc data  at https://support.10xgenomics.com/single-cell-atac/datasets/1.1.0/atac_pbmc_5k_v1
+
 ```{r warning=FALSE, message=FALSE}
 library(scATACutils)
 library(dplyr)
@@ -104,6 +106,41 @@ TSS score
 ```{r}
 PlotScatter(frip_tss, y = "tss_score", vline = 3, hline = 6)
 
+```
+
+### Plot PC correlation with the sequencing depth
+
+
+It is known that the first PC is correlated with the sequencing depth, and it is usually discarded for downstream clustering. Let's check that.
+
+Also see [Assessment of computational methods for the analysis of single-cell ATAC-seq data](https://www.biorxiv.org/content/10.1101/739011v1) for discussing this as well.
+
+```{r message= FALSE}
+library(Seurat)
+
+peaks <- Read10X_h5(filename = "~/5k_pbmc_atac/atac_pbmc_5k_v1_filtered_peak_bc_matrix.h5")
+
+# binarize the matrix
+# peaks@x[peaks@x >0]<- 1 
+
+## create a seurat object
+pbmc_seurat <- CreateSeuratObject(counts = peaks, assay = 'ATAC', project = '5k_pbmc')
+
+pbmc_seurat@meta.data %>% head()
+
+## do TF-IDF transformation and run PCA for dimension reduction/Latent Semantic Index
+pbmc_seurat<- RunLSI(pbmc_seurat, n = 50)
+
+## convert to SingleCellExperiment
+pbmc_se<- as.SingleCellExperiment(pbmc_seurat)
+
+PlotPCcorrelation(pbmc_seurat, reduction = "lsi")
+```
+
+Note the name of the reduction is different for SingleCellExperiment object.
+
+```{r}
+PlotPCcorrelation(pbmc_se, reduction = "LSI")
 ```
 
 ### Plot ATACseq tracks for each cluster of cells

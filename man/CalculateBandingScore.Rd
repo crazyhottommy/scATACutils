@@ -16,6 +16,8 @@ column contains the number of paired reads for that insert size}
 Banding scores for all cells.
 }
 \description{
+A banding score is a measure signals of nucleosomal periodicity in their fragment size distribution.
+see \href{https://www.ncbi.nlm.nih.gov/pubmed/30078704}{Darren et.al.2018}
 The input of this function is calculated by a python script:
 \href{https://github.com/crazyhottommy/scATACtools/blob/master/python/get_insert_size_distribution_per_cell.py}{get_insert_size_distribution_per_cell.py} possorted_bam.bam pbmc_5k_insert_size.txt --barcodes barcodes.tsv
 }

@@ -27,3 +27,10 @@ a ggplot2 scatter plot
 \description{
 Plot scatter plot of log10 depth vs FRIP or TSS score for scATACseq data
 }
+\examples{
+\dontrun{
+
+PlotScatter(frip, y = "FRIP")
+PlotScatter(tss_scores, y = "tss_score")
+}
+}

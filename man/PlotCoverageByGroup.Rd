@@ -8,8 +8,9 @@ PlotCoverageByGroup(chrom = NULL, start = NULL, end = NULL,
   gene_name, upstream = 2000, downstream = 2000, fragment, grouping,
   genome = "hg19", txdb = TxDb.Hsapiens.UCSC.hg19.knownGene,
   eg.db = org.Hs.eg.db, ymax = NULL, label_cex = 1,
-  label_side = "left", yaxis_cex = 1, track_col = "cadetblue2",
-  tick.dist = 10000, minor.tick.dist = 2000, tick_label_cex = 1)
+  label_side = "left", label.margin = 0.05, yaxis_cex = 1,
+  track_col = "cadetblue2", tick.dist = 10000,
+  minor.tick.dist = 2000, tick_label_cex = 1)
 }
 \arguments{
 \item{chrom}{chromosome}

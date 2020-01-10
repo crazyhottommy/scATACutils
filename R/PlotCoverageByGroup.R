@@ -91,9 +91,11 @@ PlotCoverageByGroup<- function(chrom = NULL, start = NULL, end =NULL, gene_name,
                                genome ='hg19', txdb = TxDb.Hsapiens.UCSC.hg19.knownGene,
                                eg.db = org.Hs.eg.db,
                                ymax = NULL, label_cex = 1, label_side = "left",
+                               label.margin = 0.05,
                                yaxis_cex = 1, track_col = "cadetblue2",
                                tick.dist = 10000, minor.tick.dist = 2000,
-                               tick_label_cex = 1){
+                               tick_label_cex = 1
+                               ){
   grouping<- readr::read_tsv(grouping)
   if(! all(c("cell", "cluster", "depth") %in% colnames(grouping))) {
     stop('Grouping dataframe must have cell, cluster, and depth columns.')
@@ -188,6 +190,6 @@ PlotCoverageByGroup<- function(chrom = NULL, start = NULL, end =NULL, gene_name,
                          r0=at$r0, r1=at$r1, col = track_col, ymax = yaxis_common)
     karyoploteR::kpAxis(kp, ymin=0, ymax=yaxis_common, numticks = 2, r0=at$r0, r1=at$r1, cex = yaxis_cex, labels = c("", yaxis_common))
     karyoploteR::kpAddLabels(kp, side = label_side, labels = names(coverage_norm)[i], r0=at$r0, r1=at$r1,
-                cex=label_cex, label.margin = 0.035)
+                cex=label_cex, label.margin = label.margin)
   }
 }

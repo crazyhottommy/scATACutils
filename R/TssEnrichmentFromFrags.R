@@ -92,7 +92,7 @@ TssEnrichmentFromFrags <- function(frag_gz_file,
                                    barcodeList = NULL){
 
   # Make GRanges of fragments that are solid for the cells that we care about
-  frags_valid <- data.table::fread(paste0("zcat < ", frag_gz_file)) %>%
+  frags_valid <- data.table::fread(cmd = paste0("zcat < ", frag_gz_file)) %>%
     data.frame() %>%
     dplyr::mutate(V2 = V2 + 1) %>% # make it 1 based for R
     GenomicRanges::makeGRangesFromDataFrame(seqnames.field = "V1", start.field = "V2", end.field = "V3", keep.extra.columns = TRUE)

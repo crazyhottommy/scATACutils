@@ -136,17 +136,12 @@ head(frip_tss)
 #> 4 AAACGAAAGTTACACC-1 22561 0.836      6.32
 #> 5 AAACGAACAGAGATGC-1  8119 0.836      8.41
 #> 6 AAACGAACATGCTATG-1  5261 0.735      8.91
-
-PlotScatter(frip, y = "FRIP", barcodes = barcodes$X1, hline = 0.6,
-            vline = 3)
 ```
 
-<img src="man/figures/README-unnamed-chunk-4-1.png" width="60%" height="60%" />
-
-TSS
-score
+TSS score
 
 ``` r
+
 PlotScatter(frip_tss, y = "tss_score", vline = 3, hline = 6)
 ```
 
@@ -208,14 +203,135 @@ PlotPCcorrelation(pbmc_se, reduction = "LSI")
 ``` r
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 library(org.Hs.eg.db)
-PlotCoverageByGroup(gene_name = "MS4A1", fragment = "~/5k_pbmc_atac/atac_viz/10k_pbmc/atac_v1_pbmc_10k_fragments.tsv.gz",
+
+PlotCoverageByGroup(gene_name = "MS4A1", downstream = 8000, 
+                    yaxis_cex = 1,fragment = "~/5k_pbmc_atac/atac_viz/10k_pbmc/atac_v1_pbmc_10k_fragments.tsv.gz",
                      grouping = "~/5k_pbmc_atac/atac_viz/grouping.txt", tick_label_cex = 1, tick.dist = 5000,
                      track_col = "red", 
-                     label_cex = 0.5,
-                     minor.tick.dist = 1000)
+                     label_cex = 1,
+                     minor.tick.dist = 1000, label.margin = -0.6)
 ```
 
 <img src="man/figures/README-unnamed-chunk-8-1.png" width="60%" height="60%" />
+
+### plot raw signal for each cell
+
+``` r
+
+barcodes<- read_tsv("~/5k_pbmc_atac/pbmc_5k_atac_barcodes.tsv", col_names = FALSE)
+#> Parsed with column specification:
+#> cols(
+#>   X1 = col_character()
+#> )
+
+PlotCoverageByCell(gene_name = "MS4A1",
+                   upstream = 2000, 
+                   downstream = 8000,
+                   fragment= "~/5k_pbmc_atac/fragments.tsv.gz",
+                   barcodeList=barcodes$X1,
+                   genome = "hg19", 
+                   txdb = TxDb.Hsapiens.UCSC.hg19.knownGene,
+                   eg.db = org.Hs.eg.db, cutSite = FALSE,
+                   col_fun = c("white", "blue","red"))
+#> 'select()' returned 1:1 mapping between keys and columns
+```
+
+<img src="man/figures/README-unnamed-chunk-9-1.png" width="60%" height="60%" />
+
+You might want to concatenate the raw signal with the coverage plot by
+celltype using `inkscape` or `adobe illustrator`. It is possible to
+export the karyplot object as a grob and combine with the ComplexHeatmap
+object using grid (see
+<https://github.com/bernatgel/karyoploteR/issues/51>). Currently, it is
+not implemented.
+
+### Transcription factor motif footprint
+
+``` r
+library(BSgenome.Hsapiens.UCSC.hg19)
+#> Loading required package: BSgenome
+#> Loading required package: Biostrings
+#> Loading required package: XVector
+#> 
+#> Attaching package: 'Biostrings'
+#> The following object is masked from 'package:base':
+#> 
+#>     strsplit
+#> Loading required package: rtracklayer
+library(TFBSTools)
+#> 
+library(motifmatchr)
+library(JASPAR2018)
+library(rtracklayer)
+library(EnrichedHeatmap)
+#> Loading required package: grid
+#> Loading required package: ComplexHeatmap
+#> ========================================
+#> ComplexHeatmap version 2.1.0
+#> Bioconductor page: http://bioconductor.org/packages/ComplexHeatmap/
+#> Github page: https://github.com/jokergoo/ComplexHeatmap
+#> Documentation: http://jokergoo.github.io/ComplexHeatmap-reference
+#> 
+#> If you use it in published research, please cite:
+#> Gu, Z. Complex heatmaps reveal patterns and correlations in multidimensional 
+#>   genomic data. Bioinformatics 2016.
+#> ========================================
+#> ========================================
+#> EnrichedHeatmap version 1.15.0
+#> Bioconductor page: http://bioconductor.org/packages/EnrichedHeatmap/
+#> Github page: https://github.com/jokergoo/EnrichedHeatmap
+#> Documentation: http://bioconductor.org/packages/EnrichedHeatmap/
+#> 
+#> If you use it in published research, please cite:
+#> Gu, Z. EnrichedHeatmap: an R/Bioconductor package for comprehensive 
+#> visualization of genomic signal associations. BMC Genomics 2018.
+#> ========================================
+
+opts<- list()
+opts[["species"]] <- "Homo sapiens"
+## let's plot GATA2 motif footprint
+opts[["name"]] <- "GATA2"
+opts[["type"]] <- "ChIP-seq"
+opts[["all_versions"]] <- TRUE
+PFMatrixList <- getMatrixSet(JASPAR2018, opts)
+
+PFMatrix<- PFMatrixList[[1]]
+PWM <- toPWM(PFMatrix, pseudocounts = 0.8)
+
+peaks<- import("~/5k_pbmc_atac/peaks.bed")
+```
+
+For footprint, it is important to read the fragments as cut sites,
+otherwise you will not observe a dip in the motif where TF binds and
+protects DNA from being
+cut.
+
+``` r
+insertions<- ReadFragments("~/5k_pbmc_atac/fragments.tsv.gz", cutSite = TRUE)
+cvg<- GenomicRanges::coverage(insertions)
+
+plots<- PlotMotifFootPrint(PWM = PWM, peaks = peaks, cvg = cvg, extend = 100)
+plots$heatmap
+```
+
+<img src="man/figures/README-unnamed-chunk-11-1.png" width="60%" height="60%" />
+
+``` r
+plots$lineplot
+```
+
+<img src="man/figures/README-unnamed-chunk-11-2.png" width="60%" height="60%" />
+
+**correct for cutting bias** Tn5 has a cutting bias. For more
+sophisticated bias correcting methods,
+    check:
+
+  - [seqOutBias](https://guertinlab.github.io/seqOutBias_Vignette/part3.html)
+
+  - [HINT-ATAC](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1642-2)
+
+  - [FootprintPipeline](https://github.com/aslihankarabacak/FootprintPipeline/)
+    [paper](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1654-y)
 
 ## Acknowlegements
 
@@ -230,5 +346,5 @@ PlotCoverageByGroup(gene_name = "MS4A1", fragment = "~/5k_pbmc_atac/atac_viz/10k
     <http://andrewjohnhill.com/blog/2019/04/12/streamlining-scatac-seq-visualization-and-analysis/>
     and re-implemented using the
     [karyoploteR](http://bioconductor.org/packages/release/bioc/html/karyoploteR.html).
-    Check [Signac](https://satijalab.org/signac/) by Tim Sturt for
+  - Check [Signac](https://satijalab.org/signac/) by Tim Sturt for
     similar functionalities.

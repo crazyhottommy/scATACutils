@@ -5,11 +5,13 @@
 \title{Plot scATACseq coverage for each cluster from tabix indexed fragment.tsv.gz file}
 \usage{
 PlotCoverageByGroup(chrom = NULL, start = NULL, end = NULL,
-  gene_name, upstream = 2000, downstream = 2000, fragment, grouping,
+  gene_name = NULL, upstream = 2000, downstream = 2000,
+  fragment = NULL, bam = NULL, cellbarcode_tag = "CB",
+  mapqFilter = 30, grouping, clusters_to_plot = NULL,
   genome = "hg19", txdb = TxDb.Hsapiens.UCSC.hg19.knownGene,
   eg.db = org.Hs.eg.db, ymax = NULL, label_cex = 1,
   label_side = "left", label.margin = 0.05, yaxis_cex = 1,
-  track_col = "cadetblue2", tick.dist = 10000,
+  track_cols = "cadetblue2", tick.dist = 10000,
   minor.tick.dist = 2000, tick_label_cex = 1)
 }
 \arguments{
@@ -28,8 +30,16 @@ gene_name}
 
 \item{fragment}{path to the fragment.tsv.gz file from 10x cellranger-atac output. indexed by tabix.}
 
+\item{bam}{path to the bam file}
+
+\item{cellbarcode_tag}{The cell barcode tag in the bam file, default is "CB" as in the 10x output}
+
+\item{mapqFilter}{the mapq quality score filter for reads from bam file, default is 30,}
+
 \item{grouping}{path to a tsv file with three columns: "cell", "cluster", "depth". "cell" is the
 cell barcode, "cluster" is the cluster id for each cell, and "depth" is the number of reads in that cell.}
+
+\item{clusters_to_plot}{A character vector containing clusters to plot in the tracks from bottom to top. default is all clusters}
 
 \item{genome}{hg19, hg38 or mm9, mm10}
 
@@ -42,11 +52,16 @@ track will use the same ymax, so it is comparable across clusters.}
 
 \item{label_cex}{size of the cluster label}
 
-\item{label_side}{side of the cluster label. "left" or "right"}
+\item{label_side}{side of the cluster label. "left" or "right".}
+
+\item{label.margin}{the position of the cluster label, sepcify negative e.g., -0.6
+to move to the center of the track body if label_side is left.}
 
 \item{yaxis_cex}{size of the y-axis}
 
-\item{track_col}{color of the track}
+\item{track_cols}{a vector of colors for the tracks, should be the same length as clusters_to_plot or
+the total number of clusters. If clusters_to_plot is NULL, and track_cols has only one element, all tracks will be plotted with
+the same color.}
 
 \item{tick.dist}{chromosome tick distance to mark, default 10kb}
 
@@ -58,7 +73,7 @@ track will use the same ymax, so it is comparable across clusters.}
 A karyoploteR object
 }
 \description{
-reads in the fragments.tsv.gz file for only the given region (gene), and plot using \href{http://bioconductor.org/packages/release/bioc/html/karyoploteR.html}{karyoploteR} package
+reads in the fragments.tsv.gz or bam file for only the given region (gene), and plot using \href{http://bioconductor.org/packages/release/bioc/html/karyoploteR.html}{karyoploteR} package
 }
 \examples{
 \dontrun{
@@ -70,8 +85,18 @@ chrom<-  "chr12"
 start<-  69730394
 end<- 69760971
 plotCoverageByGroup(chrom = chrom, start = start, end = end, fragment = "data/atac_viz/10k_pbmc/atac_v1_pbmc_10k_fragments.tsv.gz",
-                    grouping = "data/atac_viz/grouping.txt", track_col = "red")
+                    grouping = "data/atac_viz/grouping.txt", track_cols = "red")
 plotCoverageByGroup(gene_name = "NKG7", fragment = "data/atac_viz/10k_pbmc/atac_v1_pbmc_10k_fragments.tsv.gz",
+                    grouping = "data/atac_viz/grouping.txt", tick_label_cex = 1, tick.dist = 5000,
+                    minor.tick.dist = 1000)
+
+plotCoverageByGroup(gene_name = "NKG7", fragment = "data/atac_viz/10k_pbmc/atac_v1_pbmc_10k_fragments.tsv.gz",
+                    grouping = "data/atac_viz/grouping.txt", tick_label_cex = 1, tick.dist = 5000,
+                    minor.tick.dist = 1000, track_cols = c("red", "blue", ""cadetblue2"),
+                    clusters_to_plot = c("1", "3, "4"))
+
+plotCoverageByGroup(gene_name = "NKG7", bam = "data/atac_viz/10k_pbmc/atac_v1_pbmc_10k.bam",
+                    cellbarcode_tag= "CB", mapqFilter = 30,
                     grouping = "data/atac_viz/grouping.txt", tick_label_cex = 1, tick.dist = 5000,
                     minor.tick.dist = 1000)
 }

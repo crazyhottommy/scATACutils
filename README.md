@@ -224,7 +224,7 @@ barcodes<- read_tsv("~/5k_pbmc_atac/pbmc_5k_atac_barcodes.tsv", col_names = FALS
 #>   X1 = col_character()
 #> )
 
-PlotCoverageByCell(gene_name = "MS4A1",
+p<- PlotCoverageByCell(gene_name = "MS4A1",
                    upstream = 2000, 
                    downstream = 8000,
                    fragment= "~/5k_pbmc_atac/fragments.tsv.gz",
@@ -234,9 +234,16 @@ PlotCoverageByCell(gene_name = "MS4A1",
                    eg.db = org.Hs.eg.db, cutSite = FALSE,
                    col_fun = c("white", "blue","red"))
 #> 'select()' returned 1:1 mapping between keys and columns
-```
 
-<img src="man/figures/README-unnamed-chunk-9-1.png" width="60%" height="60%" />
+library(hexSticker)
+library(ggplot2)
+
+p <- ggplot(aes(x = mpg, y = wt), data = mtcars) + geom_point()
+p <- p + theme_void() + theme_transparent()
+
+sticker("~/Desktop/heatmap.png", package="scATACutils", p_size=6,p_color = "blue", s_x=1, s_y=.85, s_width=0.6, s_height=0.5,
+        filename="~/scATACutils.png", h_fill = "orange")
+```
 
 You might want to concatenate the raw signal with the coverage plot by
 celltype using `inkscape` or `adobe illustrator`. It is possible to

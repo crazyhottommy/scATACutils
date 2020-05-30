@@ -38,7 +38,7 @@ ReadFragmentsTabix<- function(fragment, gr, barcodeList, cutSite = FALSE){
     tibble::enframe() %>%
     dplyr::select(-name) %>%
     tidyr::separate(value, into = c("chr", "start", "end", "cell", "duplicate"), sep = "\t") %>%
-    filter(cell %in% barcodeList) %>%
+    dplyr::filter(cell %in% barcodeList) %>%
     dplyr::mutate_at(.vars = c("start", "end"), as.numeric) %>%
     # make it 1 based for R, the fragment.tsv is 0 based
     dplyr::mutate(start = start + 1) %>%

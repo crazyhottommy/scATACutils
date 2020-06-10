@@ -177,6 +177,7 @@ PlotCoverageByGroup<- function(chrom = NULL, start = NULL, end =NULL, gene_name 
     gr<- GRanges(seq = chrom, IRanges(start = start, end = end ))
   }
 
+  gr<- GenomeInfoDb::keepStandardChromosomes(gr)
 
   #### read in the fragment.tsv.gz with "chr", "start", "end", "cell", "duplicate" columns. output from cellranger-atac ###
   #### or bam file with a CB tag for cell barcode ###############

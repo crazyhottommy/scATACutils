@@ -235,15 +235,10 @@ p<- PlotCoverageByCell(gene_name = "MS4A1",
                    col_fun = c("white", "blue","red"))
 #> 'select()' returned 1:1 mapping between keys and columns
 
-library(hexSticker)
-library(ggplot2)
-
-p <- ggplot(aes(x = mpg, y = wt), data = mtcars) + geom_point()
-p <- p + theme_void() + theme_transparent()
-
-sticker("~/Desktop/heatmap.png", package="scATACutils", p_size=6,p_color = "blue", s_x=1, s_y=.85, s_width=0.6, s_height=0.5,
-        filename="~/scATACutils.png", h_fill = "orange")
+p
 ```
+
+<img src="man/figures/README-unnamed-chunk-9-1.png" width="60%" height="60%" />
 
 You might want to concatenate the raw signal with the coverage plot by
 celltype using `inkscape` or `adobe illustrator`. It is possible to

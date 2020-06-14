@@ -200,6 +200,9 @@ PlotPCcorrelation(pbmc_se, reduction = "LSI")
 
 ### Plot ATACseq tracks for each cluster of cells
 
+More examples can be found at
+<https://rpubs.com/crazyhottommy/scATAC_tracks>
+
 ``` r
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 library(org.Hs.eg.db)
@@ -334,6 +337,14 @@ sophisticated bias correcting methods,
 
   - [FootprintPipeline](https://github.com/aslihankarabacak/FootprintPipeline/)
     [paper](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1654-y)
+
+### MAESTRO
+
+many of the functions are being integrated to our
+[MAESTRO](https://github.com/liulab-dfci/MAESTRO) single-cell RNAseq and
+ATACseq analysis pipeline developed in Shirley Liu’s lab. That being
+said, I plan to implement more new features in `MAESTRO` and will leave
+`scATACutils` relatively quiet :).
 
 ## Acknowlegements
 
